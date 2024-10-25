@@ -1,20 +1,51 @@
-function fetchAndPopulateData() {
-  const url = 'http://<your-flask-app-url>/generate-report'; // Replace with your actual URL
-  const response = UrlFetchApp.fetch(url); // Fetch data from the Flask API
-  const jsonData = JSON.parse(response.getContentText()); // Parse the JSON response
-
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet(); // Get the active sheet
-  sheet.clear(); // Clear any existing data in the sheet
-  
-  // Write headers based on the keys of the first object
-  const headers = Object.keys(jsonData[0]); // Get headers from the first object
-  sheet.appendRow(headers); // Append headers to the first row
-  
-  // Loop through the data and append each row to the sheet
-  jsonData.forEach(item => {
-    const row = headers.map(header => item[header]); // Create a row from the item
-    sheet.appendRow(row); // Append the row to the sheet
-  });
-
-  Logger.log('Data imported successfully!'); // Log success message
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu('JSON Tools')
+      .addItem('Import JSON Data', 'promptForJsonData')
+      .addToUi();
 }
+
+function promptForJsonData() {
+  const ui = SpreadsheetApp.getUi();
+  const response = ui.prompt('Enter your JSON data:');
+  
+  if (response.getSelectedButton() === ui.Button.OK) {
+    const jsonData = response.getResponseText();
+    parseJsonData(jsonData);
+  } else {
+    ui.alert('No JSON data was provided.');
+  }
+}
+
+function parseJsonData(jsonData) {
+  try {
+    const parsedData = JSON.parse(jsonData);
+    
+    // Navigate to the "nodes" array
+    const nodes = parsedData.data.nodes;
+    if (!Array.isArray(nodes)) {
+      throw new Error('Expected "nodes" to be an array.');
+    }
+
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    sheet.clear(); // Clear existing content
+
+    // Extract headers from the first node's keys
+    const headers = ['Data', 'Data We Need', 'Resource Data We Need'];
+    sheet.appendRow(headers); // Append headers
+
+    nodes.forEach(node => {
+      const row = [
+        node.data,
+        node['data we need'],
+        node.resources['data we need']  // Access nested resources
+      ];
+      sheet.appendRow(row); // Append each node as a row
+    });
+
+    SpreadsheetApp.getUi().alert('Data successfully imported!');
+  } catch (error) {
+    SpreadsheetApp.getUi().alert('Error parsing JSON: ' + error.message);
+  }
+}
+
