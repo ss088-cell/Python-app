@@ -35,7 +35,7 @@
 </head>
 <body>
     <h1>Generate Report</h1>
-    <button onclick="generateReport()">Generate Report</button>
+    <button id="generate-report-btn">Generate Report</button>
     <p id="loading">Generating report, please wait...</p>
     <table id="data-table">
         <thead>
@@ -45,6 +45,8 @@
     </table>
 
     <script>
+        document.getElementById('generate-report-btn').addEventListener('click', generateReport);
+
         function generateReport() {
             // Show loading animation
             document.getElementById('loading').style.display = 'block';
@@ -54,7 +56,7 @@
             fetch('/generate-report')
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error('Network response was not ok: ' + response.statusText);
                     }
                     return response.json();
                 })
@@ -98,7 +100,8 @@
                 })
                 .catch(error => {
                     console.error('Error fetching data:', error);
-                    document.getElementById('loading').textContent = "Error generating report. Please try again.";
+                    document.getElementById('loading').textContent = "Error generating report: " + error.message;
+                    document.getElementById('loading').style.color = 'red';  // Change text color to red for visibility
                 });
         }
     </script>
