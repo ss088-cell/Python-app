@@ -63,8 +63,8 @@
                 .then(data => {
                     console.log("Data received:", data); // Log the data received
 
-                    // Check if the data is an object (not an array)
-                    const dataArray = Array.isArray(data) ? data : [data];
+                    // Assuming data is now the array of nodes directly
+                    const dataArray = data; // Directly assign
 
                     // Clear the table headers and body
                     const tableHeaders = document.getElementById("table-headers");
@@ -107,3 +107,4 @@
     </script>
 </body>
 </html>
+
