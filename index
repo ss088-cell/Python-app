@@ -53,9 +53,7 @@
             document.getElementById('data-table').style.display = 'none';
 
             // Call the Flask API endpoint
-            fetch('/generate-report', {
-                method: 'POST'  // Specify the method as POST
-            })
+            fetch('/generate-report')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok: ' + response.statusText);
@@ -63,27 +61,27 @@
                     return response.json();
                 })
                 .then(data => {
-                    // Hide loading animation
-                    document.getElementById('loading').style.display = 'none';
+                    console.log("Data received:", data); // Log the data received
 
-                    // Show table
+                    // Wrap the single object in an array
+                    const dataArray = [data];
+
+                    // Clear the table headers and body
                     const tableHeaders = document.getElementById("table-headers");
                     const tableBody = document.querySelector("#data-table tbody");
-
-                    // Clear any previous data
                     tableHeaders.innerHTML = '';
                     tableBody.innerHTML = '';
 
                     // Generate headers from the first object’s keys
-                    if (Array.isArray(data) && data.length > 0) {
-                        Object.keys(data[0]).forEach(key => {
+                    if (dataArray.length > 0) {
+                        Object.keys(dataArray[0]).forEach(key => {
                             const th = document.createElement("th");
                             th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
                             tableHeaders.appendChild(th);
                         });
 
                         // Populate rows with data
-                        data.forEach(item => {
+                        dataArray.forEach(item => {
                             const row = document.createElement("tr");
                             Object.values(item).forEach(value => {
                                 const cell = document.createElement("td");
@@ -109,3 +107,4 @@
     </script>
 </body>
 </html>
+
