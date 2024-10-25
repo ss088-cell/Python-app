@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        #loading {
+            display: none;
+            font-size: 1.5em;
+            color: blue;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            display: none;
+        }
+        table, th, td {
+            border: 1px solid black;
+            padding: 10px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generate Report</h1>
+    <button onclick="generateReport()">Generate Report</button>
+    <p id="loading">Generating report, please wait...</p>
+    <table id="data-table">
+        <thead>
+            <tr id="table-headers"></tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        function generateReport() {
+            // Show loading animation
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('data-table').style.display = 'none';
+
+            // Call the Flask API endpoint
+            fetch('http://127.0.0.1:5000/generate-report')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide loading animation
+                    document.getElementById('loading').style.display = 'none';
+
+                    // Show table
+                    const tableHeaders = document.getElementById("table-headers");
+                    const tableBody = document.querySelector("#data-table tbody");
+
+                    // Clear any previous data
+                    tableHeaders.innerHTML = '';
+                    tableBody.innerHTML = '';
+
+                    // Generate headers from the first object’s keys
+                    if (Array.isArray(data) && data.length > 0) {
+                        Object.keys(data[0]).forEach(key => {
+                            const th = document.createElement("th");
+                            th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+                            tableHeaders.appendChild(th);
+                        });
+
+                        // Populate rows with data
+                        data.forEach(item => {
+                            const row = document.createElement("tr");
+                            Object.values(item).forEach(value => {
+                                const cell = document.createElement("td");
+                                cell.textContent = value;
+                                row.appendChild(cell);
+                            });
+                            tableBody.appendChild(row);
+                        });
+
+                        // Display the table
+                        document.getElementById('data-table').style.display = 'table';
+                    } else {
+                        // No data case
+                        tableBody.innerHTML = "<tr><td colspan='3'>No data available</td></tr>";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('loading').textContent = "Error generating report. Please try again.";
+                });
+        }
+    </script>
+</body>
+</html>
