@@ -63,8 +63,8 @@
                 .then(data => {
                     console.log("Data received:", data); // Log the data received
 
-                    // Wrap the single object in an array
-                    const dataArray = [data];
+                    // Check if the data is an object (not an array)
+                    const dataArray = Array.isArray(data) ? data : [data];
 
                     // Clear the table headers and body
                     const tableHeaders = document.getElementById("table-headers");
@@ -85,7 +85,7 @@
                             const row = document.createElement("tr");
                             Object.values(item).forEach(value => {
                                 const cell = document.createElement("td");
-                                cell.textContent = value;
+                                cell.textContent = value;  // Display actual value
                                 row.appendChild(cell);
                             });
                             tableBody.appendChild(row);
@@ -107,4 +107,3 @@
     </script>
 </body>
 </html>
-
