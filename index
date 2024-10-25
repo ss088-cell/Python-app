@@ -52,73 +52,60 @@
             document.getElementById('loading').style.display = 'block';
             document.getElementById('data-table').style.display = 'none';
 
-            // Prepare the data to send (example data)
-            const values = {
-                // Include any necessary data for the report generation
-                param1: "value1", // Replace with actual parameter names and values
-                param2: "value2"  // Add more parameters as needed
-            };
-
-            // Call the Flask API endpoint with POST request
+            // Call the Flask API endpoint
             fetch('/generate-report', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(values) // Send data as JSON
+                method: 'POST'  // Specify the method as POST
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok: ' + response.statusText);
-                }
-                return response.json(); // Parse JSON response
-            })
-            .then(data => {
-                // Hide loading animation
-                document.getElementById('loading').style.display = 'none';
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Hide loading animation
+                    document.getElementById('loading').style.display = 'none';
 
-                // Process and display the data
-                const tableHeaders = document.getElementById("table-headers");
-                const tableBody = document.querySelector("#data-table tbody");
+                    // Show table
+                    const tableHeaders = document.getElementById("table-headers");
+                    const tableBody = document.querySelector("#data-table tbody");
 
-                // Clear previous data
-                tableHeaders.innerHTML = '';
-                tableBody.innerHTML = '';
+                    // Clear any previous data
+                    tableHeaders.innerHTML = '';
+                    tableBody.innerHTML = '';
 
-                // Check if data is an array and has elements
-                if (Array.isArray(data) && data.length > 0) {
                     // Generate headers from the first object’s keys
-                    Object.keys(data[0]).forEach(key => {
-                        const th = document.createElement("th");
-                        th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
-                        tableHeaders.appendChild(th);
-                    });
-
-                    // Populate rows with data
-                    data.forEach(item => {
-                        const row = document.createElement("tr");
-                        Object.values(item).forEach(value => {
-                            const cell = document.createElement("td");
-                            cell.textContent = value;
-                            row.appendChild(cell);
+                    if (Array.isArray(data) && data.length > 0) {
+                        Object.keys(data[0]).forEach(key => {
+                            const th = document.createElement("th");
+                            th.textContent = key.charAt(0).toUpperCase() + key.slice(1);
+                            tableHeaders.appendChild(th);
                         });
-                        tableBody.appendChild(row);
-                    });
 
-                    // Show the table
-                    document.getElementById('data-table').style.display = 'table';
-                } else {
-                    // No data case
-                    tableBody.innerHTML = "<tr><td colspan='3'>No data available</td></tr>";
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching data:', error);
-                document.getElementById('loading').textContent = "Error generating report: " + error.message;
-                document.getElementById('loading').style.color = 'red';  // Change text color to red for visibility
-            });
+                        // Populate rows with data
+                        data.forEach(item => {
+                            const row = document.createElement("tr");
+                            Object.values(item).forEach(value => {
+                                const cell = document.createElement("td");
+                                cell.textContent = value;
+                                row.appendChild(cell);
+                            });
+                            tableBody.appendChild(row);
+                        });
+
+                        // Display the table
+                        document.getElementById('data-table').style.display = 'table';
+                    } else {
+                        // No data case
+                        tableBody.innerHTML = "<tr><td colspan='3'>No data available</td></tr>";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('loading').textContent = "Error generating report: " + error.message;
+                    document.getElementById('loading').style.color = 'red';  // Change text color to red for visibility
+                });
         }
     </script>
 </body>
 </html>
-
